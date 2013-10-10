@@ -2,8 +2,9 @@ import random
 import sys
 LETTERS = ['A', 'C', 'G', 'T']
 EPS = 10 ** -10
-
-
+#TODO: Get letters used in DNA so arbitrary letters can be used.
+#TODO: Multiple conversion criteria
+#TODO: bug: Every sample gets the same answer!
 class MathsIsHardException(Exception):
     pass
 
@@ -11,26 +12,36 @@ class Sampler():
 
     def __init__(self, filename):
 
-        if len(sys.argv) != 2:
+        if len(sys.argv) != 3:
             print """ 
-            Usage: (python|pypy) sampler.py <length of motif to search for>
+            Usage: (python|pypy) sampler.py <length of motif to search for> <number of identical results needed to acquire "convergence">
             """
             sys.exit(1)
 
+        #we take the length of the motif to find as a command line argument
         self.l = int(sys.argv[1])
+        self.k = int(sys.argv[2])
         self.DNA = self.read_DNA(filename)
         # make sure all the sequences are the same length
         assert len(set([len(s) for s in self.DNA])) == 1
 
         self.t = len(self.DNA)  # number of sequences
         self.n = len(self.DNA[0])  # length of the sequences
+
+        #The list of samples that the sampler takes. One is added each iteration that the sampler hasn't converged.
         self.samples = []
 
-    def sample(self, nsamples):
-        starting_positions = self.get_starting_positions()
-        # TODO: Convergence
-        for sample in xrange(nsamples):
+    def check_convergence(self):
+        #if the last k samples are identical, we've converged
+        last_k_samples = self.samples[-self.k:]
+        if len(last_k_samples) == self.k and all(sample == last_k_samples[0] for sample in last_k_samples):
+            return True
+        return False
 
+    def sample(self):
+        starting_positions = self.get_starting_positions()
+        self.samples = []
+        while not self.check_convergence():
             # generate the lmers that come from the starting positions using quite a few square brackets
             tuples = [self.DNA[i][starting_positions[i]: starting_positions[i] + self.l]
                       for i in xrange(self.t)]
@@ -65,17 +76,16 @@ class Sampler():
             print (motif, score)
             self.samples.append((motif, score))
 
-
         #print "Samples: ",self.samples
-
+    
         best_motif = self.max_score(self.samples)
         # print "Best motif:", best_motif
         return best_motif
 
-    def sample_random_starting_points(self, niterations, nsamples):
+    def sample_random_starting_points(self, nsamples):
         motifs = []
         for i in xrange(nsamples):
-            sample = self.sample(niterations)
+            sample = self.sample()
             motifs.append(sample)
         print "motifs: ,", motifs
         print "Final answer: ", self.max_score(motifs)
@@ -129,14 +139,14 @@ class Sampler():
                 prob *= profile_prob
         return prob
 
-    @classmethod
-    def max_score(self, tup):
+    @staticmethod
+    def max_score(tup):
         # maximises over an iterable of tuples, in which the 
         # second element in the tuple is the score which to maximise over
         return max(tup, key=lambda x: x[1])
 
-    @classmethod
-    def choose_from_distribution(self, dist):
+    @staticmethod
+    def choose_from_distribution(dist):
         rand = random.random()
         for prob in dist:
             rand -= prob
@@ -156,8 +166,6 @@ class Sampler():
         # maybe these list comprehensions are getting a bit out of hand....
         return sum(max(index_frequencies) for index_frequencies in [[freq[i] for freq in profile.itervalues()] for i in xrange(self.l)])
 
-
-
 if __name__ == "__main__":
-    sampler = Sampler("test/DNA.txt")
-    sampler.sample_random_starting_points(niterations=1000, nsamples=100)
+    sampler = Sampler("test/DNA2.txt")
+    sampler.sample_random_starting_points(nsamples=10)
