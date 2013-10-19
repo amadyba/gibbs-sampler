@@ -15,19 +15,17 @@
 \begin{abstract}
 
 \section{Motivation:}
-
+The Motif Finding Problem has great relevance to Bioinformatics, indeed, unraveling the mechanisms that regulate gene expression is a major challenge in biology. The probabilistic nature of determining whether a consensus string is indeed the motif lends itself well to the idea of Gibbs Sampling.
 \section{Results:}
-DO SOME TESTS
-GIVE ACCURACY
-
+We provide an efficient, accurate, nondeterministic method for finding motifs. By using an MCMC style sampler, and several tools to discourage convergence to local optima, our implementation locates with a high probability the implanted motif.
 \section{Availability:}
-The source code to our implementation of the Gibbs Sampler can be viewed and downloaded at <GITHUB LINK PLZ>
-ADD PICTURES
+The source code to our implementation of the Gibbs Sampler is freely available to view and download online\footnote{https://github.com/defaultnamehere/gibbs-sampler}
 \end{abstract}
 
 \section{Introduction}
 \subsection{The Motif Finding Problem}
-The Motif Finding Problem has great relevance to Bioinformatics, indeed, unraveling the mechanisms that regulate gene expression is a major challenge in biology. An important task in this challenge is to identify regulatory elements, especially the binding sites in DNA for transcription factors. These binding sites are short DNA segments that are called motifs. These motifs are of great scientific interest to those doing research in genetics because they correspond to sequences of DNA that control the activation of specific genes. \linebreak \linebreak
+
+ An important task in understanding gene expression is to identify regulatory elements, especially the binding sites in DNA for transcription factors. These binding sites are short DNA segments that are called motifs. These motifs are of great scientific interest to those doing research in genetics because they correspond to sequences of DNA that control the activation of specific genes. \linebreak \linebreak
 In an instance of the motif finding problem, we are given $t$ DNA sequences, each of length $n$, and a length, $l$. Together they form a $t$ by $n$ DNA matrix.
 The task is to find sequences of length $l$ in each of the $t$ DNA sequences with maximum "similarity". If each of the sequences shares a common substring, then the Motif Finding Problem reduces to simply finding a substring common to each of the $t$ DNA strings with length $l$. However, in the motif finding problem, we must account for \textit{mutations}. A \textit{mutation} accounts for an index in the motif string which may differ among the corresponding "motifs" in each of the DNA sequences. These occur as motifs may differ slightly from one gene to the next. Further still, the number of these mutations that occur is typically not known \textit{a priori}. 
 \linebreak \linebreak
@@ -62,48 +60,37 @@ We note that in general, traversing an n dimensional space takes exponential tim
 The Gibbs Sampler is an algorithm that utilises hill climbing. As is the case with many such algorithms, it is difficult to tell when it has converged. We use the criteria as follows: if the profile has not changed in the last $k$ iterations, we are likely to be at an optima, be it local or global, so we say we have converged. For a given randomly selected staring point, depending on the landscape, it may be likely that we converge to a local optimum. To find the global optimum, we sample from many random starting points, and take the maximum height obtained over all convergences of these starting points. Both $k$ and the number of random starting points are taken as input parameters to the sampler.
 
 \subsection{Implementation}
-Our implementation of the Gibbs sampler and its testing program are written in Python 2.7. We recommend running the program with pypy CITE PYPY PLZ, because hey why not it's faster. \linebreak
-We take the following parameters as command line arguments.
-\begin{enumerate}
-    \item The file in which the DNA matrix is contained, one sequence per line, each sequence of the same length.
-    \item $l$ - The length of prospective motifs.
-    \item $k$ - The number of iterations for which an unchanged profile constitutes "convergence". (See the previous subsection)
-    \item $n$ - The number of random starting points to sample from. The final result is maximised over the highest point in the landscape attained by starting from each of these points.
-\end{enumerate}
-
-Implementation details are available as comments. See the Availability section of the Abstract.
-
+Our implementation of the Gibbs sampler and its testing program are written in Python 2.7. We recommend running the program with pypy\footnote{\texttt{http://www.pypy.org}}, because hey why not it's faster. \\
+We take the several parameters as command line arguments, and refer the reader to the documentation available online\footnote{\texttt{https://github.com/defaultnamehere/gibbs-sampler}}
+Implementation details are available as plentiful comments.
 \end{methods}
 
-%\begin{figure}[!tpb]%figure1
-%\centerline{\includegraphics{fig01.eps}}
-%\caption{Caption, caption.}\label{fig:01}
-%\end{figure}
 
 \section{Discussion}
 \subsection{Performance}
-We conducted tests on our implementation to gauge its performance on a 100*100 DNA matrix, with a motif of length 7 ('GATTACA') to find, with the motif being present in each sample with 0 mutations. The DNA matrix was randomly generated\footnote{See DataGenerator.py}. We present 2 tests in this section. Each test varied one parameter. We calculate the $score$ of a profile as the sum of the most frequent nucleotide in each column of the profile matrix. Below are plots for the varying parameter vs the score of the motif calculated.
+We conducted tests on our implementation to gauge its performance on a 100*100 DNA matrix, with a motif of length 7 ('GATTACA') to find, with the motif being present in each sample with 0 mutations. The DNA matrix was randomly generated\footnote{See DataGenerator.py}. We present 2 tests in this section. Each test varied one parameter. We calculate the $score$ of a profile as the sum of the most frequent nucleotide in each column of the profile matrix. Figures 1 and 2 show the effects of varying the parameters $k$ and the number of random starting points on the scores ("confidence") of the profiles generated.
 
 
 \begin{figure}[h]%figure1
     \centerline{\includegraphics[scale=0.5]{k_score.png}}
-\caption{Varying the number of iterations needed to constitute convergence, $k$, shows us unsurprisingly, that the score increases as we demand more consistent results.}\label{fig:01}
+\caption{Varying the number of iterations needed to constitute convergence, $k$, shows us unsurprisingly, that the score increases as we demand more consistent results. Note that we fix the number of random starting points at a constant 100 for this experiment.}\label{fig:01}
 \end{figure}
 
 \begin{figure}[h]%figure1
     \centerline{\includegraphics[scale=0.5]{iterations_score.png}}
-\caption{We sample from several random starting points and maximise over the values they converge to in an attempt to avoid getting "stuck" in local optima. We see here that as we increase the number of starting points, the chance of finding the global optimum increases, and so the accuracy of the profile increases too.}\label{fig:01}
+\caption{We sample from several random starting points and maximise over the values they converge to in an attempt to avoid getting "stuck" in local optima. We see here that as we increase the number of starting points, the chance of finding the global optimum increases, and so the accuracy of the profile increases too. We also note that we fix $k$ at 10 for this experiment. }\label{fig:01}
 \end{figure}
 
 We note that when the number of random starting points was 1, the sampler did not converge to the correct motif, even though it was present in the sample. This is to be expected from a randomised algorithm, and indicates that the single random starting point we chose led to convergence to a local optimum.
 \subsection{Alternate Metrics for convergence.}
 There is discussion on how best to constitute "convergence" for a Gibbs Sampler.
 Many accepted local search optimisation techniques can be applied, since the Gibbs Sampler is a variant on local search.\\
-There may be merit in using \textit{simulated annealing}, a standard local search technique in which, to avoid becoming stuck in local optima, we probabilistically move away from the optima. \citealp{Finkel}
+There may be merit in using \textit{simulated annealing}, a standard local search technique in which, to avoid becoming stuck in local optima, we probabilistically move away from the optima. \citep{Finkel}
 
 \subsection{Future work}
 The alternate methods of convergence may have some merit, and a study comparing them may provide insight regarding their relative efficiencies. In addition, some DNA samples can be biased in their distribution of nucleotides, that is, the distribution of nucleotides is not approximately uniform. In that situation, \textit{relative entropy} can be used to sample without bias. \\
-Our implementation allows for infinitely many mutations, and attempts to find the motif under these constraints. We choose to do this since we provide a general approach, and are not looking to solve a specific problem where we know the number of mutations \textit{a priori}. Future work could take the number of mutations we will allow as a parameter. Further, regarding testing, more computing resources would allow for larger DNA matricies to be tested on, which would provide a good oppourtunity to vary the number of mutations in the sample as a parameter, and observe the corresponding profile scores.
+Our implementation allows for infinitely many mutations, and attempts to find the motif under these constraints. We choose to do this since we provide a general approach, and are not looking to solve a specific problem where we know the number of mutations \textit{a priori}. Future work could take the number of mutations we will allow as a parameter. Further, regarding testing, more computing resources would allow for larger DNA matricies to be tested on, which would provide a good oppourtunity to vary the number of mutations in the sample as a parameter, and observe the corresponding profile scores. Finally, we note that we have implemented our sampler in Python. To increase speed on the programming language level, an implementation in C, C++, or Go, possibly involving multithreading could provide a performance increase.
+
 
 %\bibliographystyle{natbib}
 %\bibliographystyle{achemnat}

@@ -33,8 +33,10 @@ class Sampler():
         # make sure all the sequences are the same length
         assert self.all_the_same([len(s) for s in self.DNA])
 
-        #Now, people using this software might want to use letters other than ACTG, so we'll scan to see what letters they DID use.
-        self.letters = list(set([letter for sequence in self.DNA for letter in sequence ]))
+        # Now, people using this software might want to use letters other than
+        # ACTG, so we'll scan to see what letters they DID use.
+        self.letters = list(set(
+            [letter for sequence in self.DNA for letter in sequence]))
 
         self.t = len(self.DNA)  # number of sequences
         self.n = len(self.DNA[0])  # length of the sequences
@@ -59,7 +61,7 @@ class Sampler():
 
     def sample(self):
         starting_positions = self.get_starting_positions()
-        #reset the lists keeping track of samples and profiles
+        # reset the lists keeping track of samples and profiles
         self.samples = []
         self.profiles = []
         while not self.check_convergence():
@@ -78,7 +80,8 @@ class Sampler():
             # we COULD fiddle around adding and subtracting 1 from positions in the old profile, and that would save us an O(tl) computation.
             # But if we don't it makes it cleaner to keep track of profiles.
             # This is because keeping track of each profile requires an O(tl)
-            # copying operation anyway, so the worst case running time of this algorithm is the same.
+            # copying operation anyway, so the worst case running time of this
+            # algorithm is the same.
             profile = self.create_profile(tuples)
             # save this profile for convergence checking
 
@@ -108,13 +111,14 @@ class Sampler():
             self.DNA.insert(sequence_index, sequence)
             motif = self.get_motif(profile)
             score = self.get_score(profile) * 100 / self.l
-            #print (motif, score)
+            # print (motif, score)
             self.samples.append((motif, score))
 
-        #Convergence method 1:
-        # 
+        # Convergence method 1:
+        #
 
-        #of all the samples we found, take the best one. Hopefully it's the one we converged to, but it's not always
+        # of all the samples we found, take the best one. Hopefully it's the
+        # one we converged to, but it's not always
         best_motif = self.max_score(self.samples)
         return best_motif
 
@@ -159,7 +163,8 @@ class Sampler():
     # (This is a bit like a static method in other languages (but not exactly the same))
     @staticmethod
     def normalise(dist):
-        #cache the sum so we don't have to calculate it repeatedly in the list comprehension.
+        # cache the sum so we don't have to calculate it repeatedly in the list
+        # comprehension.
         total = sum(dist)
         return [probability / total for probability in dist]
 
@@ -169,7 +174,7 @@ class Sampler():
         prob = 1  # start at 1 so we can multiply
         profile_probs = [profile[lmer[i]][i] for i in xrange(self.l)]
         # they could *all* be 0!
-        #so return 0 in that case.
+        # so return 0 in that case.
         if all(prob == 0 for prob in profile_probs):
             return 0
         # the smallest nonzero probability
@@ -193,31 +198,36 @@ class Sampler():
     @staticmethod
     def choose_from_distribution(dist):
         """The standard way of sampling from a distribution"""
-        #take a random number between 0 and 1
+        # take a random number between 0 and 1
         rand = random.random()
         for prob in dist:
-            #and subtract a probability from it
+            # and subtract a probability from it
             rand -= prob
-            #if this particular probability caused the random number to drop to 0 or below
+            # if this particular probability caused the random number to drop
+            # to 0 or below
             if rand <= 0:
-                #then we sampled according to the distribution. We return the index since we're going to use it later
+                # then we sampled according to the distribution. We return the
+                # index since we're going to use it later
                 return dist.index(prob)
-            #otherwise just keep going
-        #if we got to here, the distribution probably wasn't notmalised
+            # otherwise just keep going
+        # if we got to here, the distribution probably wasn't notmalised
         raise MathsIsHardException, "Choosing from a distribution is hard. Did you make sure the distribution was normalised?"
 
     def get_motif(self, profile):
-        #store the motif as a list and join it at the end since strings are immutable
+        # store the motif as a list and join it at the end since strings are
+        # immutable
         motif = []
         for i in xrange(self.l):
-            candidates = [(letter, profile[letter][i]) for letter in self.letters]
+            candidates = [(letter, profile[letter][i])
+                          for letter in self.letters]
             motif.append(self.max_score(candidates)[0])
         return "".join(motif)
 
     # calculate the score of a profile, as defined in lectures
     def get_score(self, profile):
         # maybe these list comprehensions are getting a bit out of hand....
-        # the score for a profile is the sum of the most frequent nucleotide in every position in the profile's indexes
+        # the score for a profile is the sum of the most frequent nucleotide in
+        # every position in the profile's indexes
         return sum(max(index_frequencies) for index_frequencies in [[freq[i] for freq in profile.itervalues()] for i in xrange(self.l)])
 
     def show_motif(self, starting_positions):
@@ -226,8 +236,8 @@ class Sampler():
             sequence = self.DNA[i]
             starting_position = starting_positions[i]
             print sequence[:starting_position].lower() + \
-                    sequence[starting_position: starting_position + self.l] + \
-                    sequence[starting_position + self.l:].lower()
+                sequence[starting_position: starting_position + self.l] + \
+                sequence[starting_position + self.l:].lower()
 
 
 if __name__ == "__main__":

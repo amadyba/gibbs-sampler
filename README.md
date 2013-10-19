@@ -9,6 +9,11 @@ Usage
 -----
 You can run me like this:
 
-mike@mikebox:$ python sampler.py <length of l-mers> <number of iterations for which nothing changing constitutes "convergence">
+mike@mikebox:$ (python|pypy) sampler.py file l k n
+
+         file = <input file containing DNA matrix> 
+         l = <length of motif to search for> 
+         k = <number of identical results needed to acquire "convergence">
+         n = <number of times to re-run the algorithm from a random starting point>
 
 Don't forget those parameters. It feels all weird when someone runs me without them. Or worse, with extras. Ew.

@@ -5,9 +5,9 @@ VERY_SMALL = 10 ** -10
 # TODO: Multiple conversion criteria
 
 
-#things the program will say it's doing while it's loading
-LOADING_PHRASES = ["Actually finding motifs", 
-                   "Reticulating splines", 
+# things the program will say it's doing while it's loading
+LOADING_PHRASES = ["Actually finding motifs",
+                   "Reticulating splines",
                    "Never giving you up",
                    "Never letting you down",
                    "Approximating pi",
@@ -24,7 +24,8 @@ LOADING_PHRASES = ["Actually finding motifs",
                    "Re-recursing",
                    "Shining shoes",
                    "Flim-flamming"
-                  ]
+                   ]
+
 
 class MathsIsHardException(Exception):
 
@@ -39,7 +40,7 @@ class Sampler():
     def __init__(self, filename, l, k):
         """Takes the path to the DNA matrix as a file, with one DNA sequence per line, each of the same length"""
 
-        #the length of the motif to find
+        # the length of the motif to find
         self.l = l
         # the number of iterations for which nothing changing will constitute
         # "convergence"
@@ -64,8 +65,6 @@ class Sampler():
         # We'll keep track of the last k profiles, so we can tell when we've
         # converged
         self.profiles = []
-        #maps motif - > list of l starting positions
-        self.motif_to_starting_positions = {}
 
     @staticmethod
     def all_the_same(sequence):
@@ -119,15 +118,10 @@ class Sampler():
                 prob = self.get_generation_prob(lmer, profile)
                 probs.append(prob)
             probs = self.normalise(probs)
-            # print "probs, ", probs
 
             motif = self.get_motif(profile)
             score = self.get_score(profile) * 100 / self.l
-            # print (motif, score)
             self.samples.append((motif, score))
-            #save the starting position for later so we can print it
-            #this only takes O(l) time (to hash the string)
-            self.motif_to_starting_positions[motif] = starting_positions
 
             new_starting_index = self.choose_from_distribution(probs)
             starting_positions[sequence_index] = new_starting_index
@@ -141,11 +135,10 @@ class Sampler():
         best_motif = self.max_score(self.samples)
         return best_motif
 
-    
     def sample_random_starting_points(self, nsamples, silly=False):
         """Start the sampler from nsamples random starting points and take the best answer after that"""
         motifs = []
-        #print "Finding motifs ...."
+        # print "Finding motifs ...."
         for i in xrange(nsamples):
             if silly:
                 if random.random() < 0.3 and LOADING_PHRASES:
@@ -155,11 +148,6 @@ class Sampler():
             sample = self.sample()
             motifs.append(sample)
         motif = self.max_score(motifs)
-        #print
-        #print "Final answer:", motif[0]
-        #print "Score:", motif[1]
-        #print 
-        #self.show_motif(motif[0])
         return motif
 
     def read_DNA(self, filename):
@@ -263,8 +251,7 @@ class Sampler():
         # every position in the profile's indexes
         return sum(max(index_frequencies) for index_frequencies in ((freq[i] for freq in profile.itervalues()) for i in xrange(self.l)))
 
-    def show_motif(self, motif):
-        starting_positions = self.motif_to_starting_positions[motif]
+    def show_motif(self, motif, starting_positions):
         """Show where the motif is in each sequence, in a pretty way
         eg:
             aaaaaCATaa
@@ -274,7 +261,8 @@ class Sampler():
         for i in xrange(self.t):
             sequence = self.DNA[i]
             starting_position = starting_positions[i]
-            #lowercase if it doesn't match"".join(letter if motif[i] [sequence[starting_position: starting_position + self.l]]) + 
+            # lowercase if it doesn't match"".join(letter if motif[i]
+            # [sequence[starting_position: starting_position + self.l]]) +
             print sequence[:starting_position].lower() + \
                 sequence[starting_position: starting_position + self.l] + \
                 sequence[starting_position + self.l:].lower()
@@ -285,8 +273,8 @@ if __name__ == "__main__":
         print """
         Usage: (python|pypy) sampler.py <file> <l> <k> <n>
 
-        file = <input file containing DNA matrix> 
-        l = <length of motif to search for> 
+        file = <input file containing DNA matrix>
+        l = <length of motif to search for>
         k = <number of identical results needed to acquire "convergence">
         n = <number of times to re-run the algorithm from a random starting point>
         """
