@@ -1,6 +1,3 @@
-gibbs-sampler
-=============
-=======
 COMP3456 - Assignment 1: Gibbs sampler for Motif Finding
 ========================================================
 

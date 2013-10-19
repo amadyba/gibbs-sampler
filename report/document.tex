@@ -4,8 +4,8 @@
 
 \begin{document}
 \firstpage{1}
-\title[short Title]{Applications of Gibbs sampling to the Motif Finding Problem}
-\author[Sample \textit{et~al}]{Alexander Hogue}
+\title[Gibbs Sampling]{Applications of Gibbs sampling to the Motif Finding Problem}
+\author[Alexander Hogue]{Alexander Hogue}
 \address{}
 \history{}
 \editor{}
@@ -81,6 +81,21 @@ Implementation details are available as comments. See the Availability section o
 %\end{figure}
 
 \section{Discussion}
+\subsection{Performance}
+We conducted tests on our implementation to gauge its performance on a 100*100 DNA matrix, with a motif of length 7 ('GATTACA') to find, with the motif being present in each sample with 0 mutations. The DNA matrix was randomly generated\footnote{See DataGenerator.py}. We present 2 tests in this section. Each test varied one parameter. We calculate the $score$ of a profile as the sum of the most frequent nucleotide in each column of the profile matrix. Below are plots for the varying parameter vs the score of the motif calculated.
+
+
+\begin{figure}[h]%figure1
+    \centerline{\includegraphics[scale=0.5]{k_score.png}}
+\caption{Varying the number of iterations needed to constitute convergence, $k$, shows us unsurprisingly, that the score increases as we demand more consistent results.}\label{fig:01}
+\end{figure}
+
+\begin{figure}[h]%figure1
+    \centerline{\includegraphics[scale=0.5]{iterations_score.png}}
+\caption{We sample from several random starting points and maximise over the values they converge to in an attempt to avoid getting "stuck" in local optima. We see here that as we increase the number of starting points, the chance of finding the global optimum increases, and so the accuracy of the profile increases too.}\label{fig:01}
+\end{figure}
+
+We note that when the number of random starting points was 1, the sampler did not converge to the correct motif, even though it was present in the sample. This is to be expected from a randomised algorithm, and indicates that the single random starting point we chose led to convergence to a local optimum.
 \subsection{Alternate Metrics for convergence.}
 There is discussion on how best to constitute "convergence" for a Gibbs Sampler.
 Many accepted local search optimisation techniques can be applied, since the Gibbs Sampler is a variant on local search.\\
@@ -88,9 +103,7 @@ There may be merit in using \textit{simulated annealing}, a standard local searc
 
 \subsection{Future work}
 The alternate methods of convergence may have some merit, and a study comparing them may provide insight regarding their relative efficiencies. In addition, some DNA samples can be biased in their distribution of nucleotides, that is, the distribution of nucleotides is not approximately uniform. In that situation, \textit{relative entropy} can be used to sample without bias. \\
-Our implementation allows for infinitely many mutations, and attempts to find the motif under these constraints. We choose to do this since we provide a general approach, and are not looking to solve a specific problem where we know the number of mutations \textit{a priori}. Future work could take the number of mutations we will allow as a parameter.
-
-\section*{Acknowledgement}
+Our implementation allows for infinitely many mutations, and attempts to find the motif under these constraints. We choose to do this since we provide a general approach, and are not looking to solve a specific problem where we know the number of mutations \textit{a priori}. Future work could take the number of mutations we will allow as a parameter. Further, regarding testing, more computing resources would allow for larger DNA matricies to be tested on, which would provide a good oppourtunity to vary the number of mutations in the sample as a parameter, and observe the corresponding profile scores.
 
 %\bibliographystyle{natbib}
 %\bibliographystyle{achemnat}
